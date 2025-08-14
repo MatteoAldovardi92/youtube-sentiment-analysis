@@ -110,3 +110,35 @@ Once your project is on GitHub, you can easily open it in Google Colab.
 3.  Select the `GitHub` tab.
 4.  Enter your GitHub repository URL and press Enter.
 5.  Click on the notebook file (`.ipynb` or `.py`) you want to open.
+
+## 9. Troubleshooting Push Issues (403 Forbidden)
+
+Encountering a `403 Forbidden` error when pushing to GitHub often indicates an authentication problem. This usually happens when Git tries to use outdated or incorrect credentials.
+
+### Common Causes and Solutions:
+
+1.  **Cached Old Credentials (macOS Keychain):**
+    If you've recently changed your GitHub username or password/PAT, your system might be trying to use old, cached credentials.
+
+    **Solution:** Clear the cached credentials from your macOS Keychain.
+    *   Open `Keychain Access.app` (Applications > Utilities).
+    *   Search for `github.com`.
+    *   Delete any entries related to `github.com` (typically of kind "Internet Password").
+    *   Try pushing again. Git will then prompt you for new credentials.
+
+2.  **Incorrect or Expired Personal Access Token (PAT):**
+    GitHub now primarily uses Personal Access Tokens (PATs) for command-line authentication instead of your account password. A `403` error can occur if your PAT is incorrect, has expired, or lacks the necessary permissions.
+
+    **Solution:**
+    *   **Verify your PAT:**
+        *   Ensure you copied the PAT correctly (no extra spaces or typos).
+        *   Check its expiration date on GitHub ([https://github.com/settings/tokens](https://github.com/settings/tokens)).
+        *   Verify its permissions (scopes). For pushing, it needs at least the `repo` scope (for classic tokens) or `contents:write` (for fine-grained tokens).
+    *   **Generate a new PAT:** If in doubt, generate a brand new PAT on GitHub ([https://github.com/settings/tokens/new](https://github.com/settings/tokens/new)) with the correct scopes and try again.
+
+3.  **"Password" Prompt vs. PAT:**
+    When Git prompts for a "Password," it's expecting your **Personal Access Token (PAT)**, not your actual GitHub account password.
+
+    **Solution:** When you see the "Password" prompt, paste your PAT there.
+
+By addressing these points, you should be able to resolve most `403 Forbidden` errors during Git pushes.
