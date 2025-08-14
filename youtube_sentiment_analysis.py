@@ -64,36 +64,87 @@ def get_overall_sentiment(df):
     overall_sentiment = df['sentiment_score'].mean()
     return overall_sentiment
 
-if __name__ == '__main__':
-    # --- Replace with your Video ID ---
-    VIDEO_ID = "YOUR_VIDEO_ID"
-    # -----------------------------------------
+import json
+import matplotlib.pyplot as plt # Added import
+import seaborn as sns # Added import
+from sklearn.metrics import confusion_matrix # Added import
 
+if __name__ == '__main__':
     # Check if running in Google Colab
     try:
         from google.colab import userdata
         API_KEY = userdata.get('YOUTUBE_API_KEY')
     except ImportError:
-        API_KEY = "YOUR_API_KEY" # Fallback for local execution
+        import os
+        API_KEY = os.environ.get('YOUTUBE_API_KEY', "YOUR_API_KEY") # Fallback for local execution
 
-    if API_KEY == "YOUR_API_KEY" or VIDEO_ID == "YOUR_VIDEO_ID":
-        print("Please replace 'YOUR_VIDEO_ID' with your actual Video ID.")
-        print("If running locally, also replace 'YOUR_API_KEY' with your YouTube Data API Key.")
+    if API_KEY == "YOUR_API_KEY":
+        print("Please set your YOUTUBE_API_KEY environment variable or Colab secret.")
     else:
-        # 1. Get comments from the video
-        video_comments = get_video_comments(API_KEY, VIDEO_ID)
+        try:
+            with open('video_list.json', 'r') as f:
+                video_data = json.load(f)
+        except FileNotFoundError:
+            print("Error: video_list.json not found. Please create it with your test video data.")
+            video_data = []
 
-        if video_comments:
-            # 2. Analyze the sentiment of the comments
-            sentiment_df = analyze_sentiment(video_comments)
+        if not video_data:
+            print("No video data found in video_list.json. Please add videos to test.")
 
-            # 3. Get the overall sentiment
-            overall_sentiment_score = get_overall_sentiment(sentiment_df)
+        true_labels = [] # Initialize list for true labels
+        predicted_labels = [] # Initialize list for predicted labels
 
-            # Print the results
-            print("--- Sentiment Analysis Results ---")
-            print(sentiment_df)
-            print("\n--- Overall Sentiment ---")
-            print(f"The overall sentiment score for the video is: {overall_sentiment_score:.4f}")
+        for video_info in video_data:
+            video_id = video_info.get('videoId')
+            expected_sentiment = video_info.get('sentiment')
+            video_title = video_info.get('title', 'Unknown Title')
+
+            if not video_id:
+                print(f"Skipping video with missing ID: {video_title}")
+                continue
+
+            print(f"\n--- Analyzing Video: {video_title} (ID: {video_id}) ---")
+            print(f"Expected Sentiment: {'Positive' if expected_sentiment == 1 else 'Negative' if expected_sentiment == 0 else 'N/A'}")
+
+            video_comments = get_video_comments(API_KEY, video_id)
+
+            if video_comments:
+                sentiment_df = analyze_sentiment(video_comments)
+                overall_sentiment_score = get_overall_sentiment(sentiment_df)
+
+                print("\n--- Sentiment Analysis Results ---")
+                print(sentiment_df)
+                print(f"\nOverall Sentiment Score: {overall_sentiment_score:.4f}")
+
+                # Simple comparison for demonstration
+                model_predicted_sentiment = 1 if overall_sentiment_score >= 0.5 else 0 # Assuming 0.5 as threshold
+                print(f"Model Predicted Sentiment: {'Positive' if model_predicted_sentiment == 1 else 'Negative'}")
+
+                if expected_sentiment is not None:
+                    if model_predicted_sentiment == expected_sentiment:
+                        print("Result: MATCHES EXPECTED SENTIMENT!")
+                    else:
+                        print("Result: DOES NOT MATCH EXPECTED SENTIMENT!")
+                    true_labels.append(expected_sentiment) # Append true label
+                    predicted_labels.append(model_predicted_sentiment) # Append predicted label
+                else:
+                    print("No expected sentiment provided for comparison.")
+            else:
+                print("No comments found or an error occurred for this video.")
+
+        # Plotting the Confusion Matrix
+        if len(true_labels) > 0 and len(predicted_labels) > 0:
+            print("\n--- Generating Confusion Matrix ---")
+            cm = confusion_matrix(true_labels, predicted_labels, labels=[0, 1]) # Labels for Negative (0) and Positive (1)
+            
+            plt.figure(figsize=(6, 5))
+            sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', cbar=False,
+                        xticklabels=['Predicted Negative', 'Predicted Positive'],
+                        yticklabels=['Actual Negative', 'Actual Positive'])
+            plt.xlabel('Predicted Label')
+            plt.ylabel('True Label')
+            plt.title('Confusion Matrix')
+            plt.savefig('confusion_matrix.png')
+            print("Confusion matrix saved as 'confusion_matrix.png'")
         else:
-            print("No comments found or an error occurred.")
+            print("\nNot enough data to generate a confusion matrix.")
