@@ -85,18 +85,3 @@ This project was developed as a practical exercise to solidify several key conce
     ```
     The script will fetch comments, perform sentiment analysis, print results for each video, and generate `confusion_matrix.png` in the project directory.
 
-## Is this project worth of a portfolio?
-
-Absolutely! While it might be a small project, it effectively demonstrates a range of valuable skills and concepts highly relevant in data science, machine learning, and software engineering:
-
-*   **API Integration:** Practical experience consuming and managing external APIs (YouTube Data API).
-*   **Natural Language Processing (NLP):** Application of pre-trained models from Hugging Face for a real-world NLP task (sentiment analysis).
-*   **Data Pipeline Development:** Shows the ability to build a complete workflow from data acquisition to processing, analysis, and visualization.
-*   **Model Evaluation:** Understanding and implementing evaluation metrics like the confusion matrix to assess model performance.
-*   **Secure Credential Management:** Demonstrates awareness and implementation of best practices for handling sensitive information (API keys).
-*   **Version Control:** Proper use of Git and GitHub for project management and collaboration.
-*   **Problem-Solving:** The journey of setting up and troubleshooting (as documented in the `github_manual.md`) itself is a testament to problem-solving skills.
-
-**Captivating Visuals:** The generated `confusion_matrix.png` provides a direct visual output of the project's analytical capability. You could also include a screenshot of the script running in a Colab notebook or a snippet of the console output in your README to make it more engaging.
-
-This project serves as an excellent foundational piece to showcase your understanding of these interconnected concepts.
